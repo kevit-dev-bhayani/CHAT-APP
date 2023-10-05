@@ -6,6 +6,9 @@ const socketio = require("socket.io");
 const { generateMessage } = require("./utils/messages");
 const { generateLocationMessage } = require("./utils/location_message");
 
+const logger=require('../logger')
+
+
 const {
   addUser,
   removeUser,
@@ -39,6 +42,7 @@ io.on("connection", (socket) => {
     socket.broadcast
       .to(user.room)
       .emit("message", generateMessage(`${user.username} has joined!`));
+      logger.warn(`${user.username} joined room ${user.room}`)
 
     io.to(user.room).emit('roomData',{
         room:user.room,
@@ -53,9 +57,11 @@ io.on("connection", (socket) => {
     const user=getUser(socket.id)
 
     if (filter.isProfane(message)) {
+      logger.warn(`${user.username} just abused in room ${user.room} :${message}`)
       return callback("No bad-words allowed");
     }
 
+    logger.info(`${user.username} : ${message} in room :${user.room}`)
     io.to(user.room).emit("message", generateMessage(user.username,message));
     callback();
   });
@@ -77,6 +83,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     const user = removeUser(socket.id);
     if (user) {
+      logger.warn(`${user.username} just left room ${user.room}`)      
       io.to(user.room).emit(
         "message",
         generateMessage(`${user.username} has left ${user.room}`)

@@ -1,3 +1,4 @@
+// const logger=require('../logger')
 const socket=io()
 
 //Elements
@@ -98,6 +99,7 @@ socket.emit('join',{username,room},(error)=>{
     if(error){
         alert(error)
         location.href='/'
+        
     }
     // console.log(`user added to : ${room}`)
 })
